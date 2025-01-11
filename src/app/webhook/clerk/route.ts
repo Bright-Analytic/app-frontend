@@ -1,9 +1,10 @@
 import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse, userAgent } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-// import { schemas, DrizzleDb } from "@shared/drizzle-client";
 import { eq } from "drizzle-orm";
+import { connectDb } from "@/app/db";
+import { usersTable } from "@/db/schema";
 
 export async function POST(req: NextRequest) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -55,58 +56,58 @@ export async function POST(req: NextRequest) {
     `Received webhook with ID ${evt.data.id} and event type of ${eventType}`
   );
 
-  // const dClient = new DrizzleDb(process.env.DATABASE_URL!);
+  if (!global.db) connectDb();
 
-  // if (eventType == "user.created") {
-  //   console.log(evt.data.primary_email_address_id, evt.data.username);
-  //   if (evt.data.primary_email_address_id && evt.data.username) {
-  //     await dClient.db.insert(schemas.usersTable).values({
-  //       first_name: evt.data.first_name ?? "",
-  //       last_name: evt.data.last_name ?? "",
-  //       email: evt.data.email_addresses.filter(
-  //         (value) => value.id == evt.data.primary_email_address_id
-  //       )[0].email_address,
-  //       username: evt.data.username,
-  //       clerk_uid: evt.data.id,
-  //       created_at: new Date(),
-  //       updated_at: new Date(),
-  //     });
-  //     return NextResponse.json(
-  //       { success: true, message: "user created successfully." },
-  //       { status: 200 }
-  //     );
-  //   } else {
-  //     return NextResponse.json(
-  //       { success: false, message: "username or email_id not found." },
-  //       { status: 400 }
-  //     );
-  //   }
-  // } else if (eventType == "user.updated") {
-  //   await dClient.db
-  //     .update(schemas.usersTable)
-  //     .set({
-  //       first_name: evt.data.first_name ?? "",
-  //       last_name: evt.data.last_name ?? "",
-  //       email: evt.data.email_addresses.filter(
-  //         (value) => value.id == evt.data.primary_email_address_id
-  //       )[0].email_address,
-  //       username: evt.data.username ?? "",
-  //       updated_at: new Date(),
-  //     })
-  //     .where(eq(schemas.usersTable.clerk_uid, evt.data.id));
-  //   return NextResponse.json(
-  //     { success: true, message: "user updated successfully." },
-  //     { status: 200 }
-  //   );
-  // } else if (eventType == "user.deleted") {
-  //   await dClient.db
-  //     .delete(schemas.usersTable)
-  //     .where(eq(schemas.usersTable.clerk_uid, evt.data.id ?? ""));
-  //   return NextResponse.json(
-  //     { success: true, message: "user deleted successfully." },
-  //     { status: 200 }
-  //   );
-  // }
+  if (eventType == "user.created") {
+    console.log(evt.data.primary_email_address_id, evt.data.username);
+    if (evt.data.primary_email_address_id && evt.data.username) {
+      await global.db.insert(usersTable).values({
+        first_name: evt.data.first_name ?? "",
+        last_name: evt.data.last_name ?? "",
+        email: evt.data.email_addresses.filter(
+          (value) => value.id == evt.data.primary_email_address_id
+        )[0].email_address,
+        username: evt.data.username,
+        clerk_uid: evt.data.id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+      return NextResponse.json(
+        { success: true, message: "user created successfully." },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { success: false, message: "username or email_id not found." },
+        { status: 400 }
+      );
+    }
+  } else if (eventType == "user.updated") {
+    await global.db
+      .update(usersTable)
+      .set({
+        first_name: evt.data.first_name ?? "",
+        last_name: evt.data.last_name ?? "",
+        email: evt.data.email_addresses.filter(
+          (value) => value.id == evt.data.primary_email_address_id
+        )[0].email_address,
+        username: evt.data.username ?? "",
+        updated_at: new Date(),
+      })
+      .where(eq(usersTable.clerk_uid, evt.data.id));
+    return NextResponse.json(
+      { success: true, message: "user updated successfully." },
+      { status: 200 }
+    );
+  } else if (eventType == "user.deleted") {
+    await global.db
+      .delete(usersTable)
+      .where(eq(usersTable.clerk_uid, evt.data.id ?? ""));
+    return NextResponse.json(
+      { success: true, message: "user deleted successfully." },
+      { status: 200 }
+    );
+  }
 
   return NextResponse.json(
     { success: false, message: "Failed" },
