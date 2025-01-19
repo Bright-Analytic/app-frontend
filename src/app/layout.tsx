@@ -61,6 +61,19 @@ export default function RootLayout({
           {children}
           <Footer />
           <script async={true} src="https://scripts.adityasharma.live/script.js"></script>
+          
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y8W1YRRY84"></script>
+          <script>
+            {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-Y8W1YRRY84');
+            `}
+          </script>
+
+
         </body>
       </html>
     </ClerkProvider>
