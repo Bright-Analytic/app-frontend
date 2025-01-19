@@ -11,18 +11,17 @@ export default function Navbar() {
       className="fixed w-full z-50 top-0 bg-none flex backdrop-blur-sm md:py-5 py-3 px-3 md:px-0"
     >
       <div className="flex justify-between max-w-7xl w-full mx-auto">
-        <div className="flex justify-center gap-x-5">
-          <div className="flex">
-            <Image
+        <div className="flex justify-center gap-x-10">
+            <img
               alt="BrightAnalytics"
-              src={"/android-chrome-512x512.png"}
-              width={35}
-              height={30}
+              src={"/logo.png"}
               style={{
                 objectFit: "contain",
+                width: 170,
+                mixBlendMode: 'multiply',
+                borderRadius: 10
               }}
             />
-          </div>
           <div className="md:flex hidden gap-x-8 text-zinc-800 my-auto text-sm">
             <span className="flex gap-x-3">
               Products{" "}
